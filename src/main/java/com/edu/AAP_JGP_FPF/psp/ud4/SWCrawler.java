@@ -18,48 +18,41 @@ public class SWCrawler {
     private final ObjectMapper objectMapper;
     private final ExecutorService executor;
 
-    // CACHÉ: Guarda URLs que ya hemos pedido o estamos pidiendo
     private final Map<String, CompletableFuture<?>> cache = new ConcurrentHashMap<>();
 
+    /**
+     * Constructor. Creará 10 hilos usando Executor pera solicitar la petición de información a la API
+     */
     public SWCrawler() {
-        // Límite de 10 hilos simultáneos para ser educados con la API
         this.executor = Executors.newFixedThreadPool(10);
 
         this.httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_2)
                 .connectTimeout(Duration.ofSeconds(15))
-                .executor(executor) // Usamos nuestro pool de hilos
+                .executor(executor)
                 .build();
         this.objectMapper = new ObjectMapper();
     }
 
     /**
-     * Método PRINCIPAL: Descarga la película y luego todo lo relacionado
+     * Método principal que descarga la película y la información detallada de la misma
      */
     public CompletableFuture<FilmReport> crawlFilm(int filmId) {
         String url = "https://swapi.dev/api/films/" + filmId + "/";
 
-        // FASE 1: Descargar Película
         return get(url, Film.class).thenCompose(film -> {
             System.out.println("Película: " + film.title + ". Descargando personajes para analizar sus naves...");
 
-            // FASE 2: Descargar Personajes primero
-            // Necesitamos sus datos para saber qué naves "extra" hay que buscar
             return getAll(film.characters, Person.class).thenCompose(people -> {
 
-                // Recolectamos TODAS las URLs de naves (las de la peli + las de los personajes)
-                // Usamos un Set para evitar duplicados, aunque la caché ya protege, esto ahorra procesamiento
                 java.util.Set<String> allStarshipUrls = new java.util.HashSet<>(film.starships);
                 people.forEach(p -> allStarshipUrls.addAll(p.starships));
 
-                // Lo mismo para vehículos
                 java.util.Set<String> allVehicleUrls = new java.util.HashSet<>(film.vehicles);
                 people.forEach(p -> allVehicleUrls.addAll(p.vehicles));
 
                 System.out.println("  -> Detectadas " + allStarshipUrls.size() + " naves y " + allVehicleUrls.size() + " vehículos totales.");
 
-                // FASE 3: Descargar todo lo demás en paralelo
-                // (Planetas, Especies, y la lista COMPLETA de Naves y Vehículos)
                 var planetsFuture = getAll(film.planets, Planet.class);
                 var speciesFuture = getAll(film.species, Species.class);
                 var starshipsFuture = getAll(new java.util.ArrayList<>(allStarshipUrls), Starship.class);
@@ -70,7 +63,7 @@ public class SWCrawler {
                                 film,
                                 planetsFuture.join(),
                                 speciesFuture.join(),
-                                people, // Pasamos la lista de personas que ya descargamos en Fase 2
+                                people,
                                 starshipsFuture.join(),
                                 vehiclesFuture.join()
                         ));
@@ -78,25 +71,23 @@ public class SWCrawler {
         });
     }
 
-    // Helper para descargar una LISTA de URLs en paralelo
     private <T> CompletableFuture<List<T>> getAll(List<String> urls, Class<T> clazz) {
         List<CompletableFuture<T>> futures = urls.stream()
                 .map(url -> get(url, clazz))
                 .collect(Collectors.toList());
 
-        // Truco estándar para convertir List<Future<T>> a Future<List<T>>
+        // Convertimos List<Future<T>> a Future<List<T>>
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                 .thenApply(v -> futures.stream()
                         .map(CompletableFuture::join)
                         .collect(Collectors.toList()));
     }
 
-    // Método individual con Caché
     @SuppressWarnings("unchecked")
     public <T> CompletableFuture<T> get(String url, Class<T> clazz) {
         String secureUrl = url.replace("http://", "https://");
 
-        // Si la URL ya está en caché, devolvemos el Futuro existente (evita duplicados)
+        // Si la URL ya está en caché, devolvemos el Futuro existente
         return (CompletableFuture<T>) cache.computeIfAbsent(secureUrl, k -> {
 
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create(k)).GET().build();
@@ -112,7 +103,6 @@ public class SWCrawler {
         });
     }
 
-    // Para cerrar los hilos al terminar
     public void shutdown() {
         executor.shutdown();
     }

@@ -11,17 +11,15 @@ public class Film {
     @JsonProperty("episode_id")
     public int episodeId;
 
-    // --- NUEVOS CAMPOS ---
     @JsonProperty("opening_crawl")
-    public String openingCrawl; // El texto amarillo que flota en el espacio
+    public String openingCrawl;
 
     public String director;
 
-    public String producer; // En el JSON viene como "producer"
+    public String producer;
 
     @JsonProperty("release_date")
     public String releaseDate;
-    // ---------------------
 
     public String url;
 

@@ -26,7 +26,6 @@ public class Person {
     public String gender;
     public String url;
 
-    // Necesitamos esto para saber qué naves pilota este personaje
     public List<String> starships;
     public List<String> vehicles;
 

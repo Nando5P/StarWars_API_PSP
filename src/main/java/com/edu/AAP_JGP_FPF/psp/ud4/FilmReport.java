@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public class FilmReport {
 
-    // Colores para destacar secciones
+    // --- CÓDIGOS ANSI PARA COLORES EN CONSOLA ---
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_YELLOW = "\u001B[33m";
     private static final String ANSI_BOLD = "\u001B[1m";
@@ -41,11 +41,11 @@ public class FilmReport {
         System.out.println("Productores:    " + film.producer);
         System.out.println("Lanzamiento:    " + film.releaseDate);
 
-        // Efecto del Opening Crawl (mantenemos tu efecto chulo)
+        System.out.println("\n" + border);
         printOpeningCrawlWithEffect(film.openingCrawl);
         System.out.println(border);
 
-        // --- PLANETAS ---
+        // Detalles de los planetas
         System.out.println("\n" + ANSI_BOLD + ">>> PLANETAS (" + planets.size() + ")" + ANSI_RESET);
         for (Planet p : planets) {
             System.out.println(ANSI_CYAN + " • " + p.name + ANSI_RESET);
@@ -54,7 +54,7 @@ public class FilmReport {
             System.out.printf("     Rotación: %-12s | Órbita: %s días%n", p.rotationPeriod, p.orbitalPeriod);
         }
 
-        // --- ESPECIES ---
+        // Detalles de las especies
         System.out.println("\n" + ANSI_BOLD + ">>> ESPECIES (" + species.size() + ")" + ANSI_RESET);
         for (Species s : species) {
             System.out.println(ANSI_CYAN + " • " + s.name + ANSI_RESET);
@@ -63,7 +63,7 @@ public class FilmReport {
             System.out.printf("     Rasgos: Piel(%s), Ojos(%s)%n", s.skinColors, s.eyeColors);
         }
 
-        // --- PERSONAJES (Y SUS MÁQUINAS) ---
+        // Detalles de los personajes y sus naves y vehículos
         System.out.println("\n" + ANSI_BOLD + ">>> PERSONAJES (" + people.size() + ")" + ANSI_RESET);
         for (Person p : people) {
             System.out.println(ANSI_BOLD + " > " + p.name.toUpperCase() + ANSI_RESET);
@@ -72,7 +72,7 @@ public class FilmReport {
                     p.birthYear, p.gender, p.height, p.mass);
             System.out.printf("           Pelo: %-12s | Ojos: %s%n", p.hairColor, p.eyeColor);
 
-            // NAVES DETALLADAS
+            // Detalles de las naves
             if (!p.starships.isEmpty()) {
                 System.out.println(ANSI_YELLOW + "   [Naves Pilotadas]:" + ANSI_RESET);
                 for (String url : p.starships) {
@@ -89,7 +89,7 @@ public class FilmReport {
                 }
             }
 
-            // VEHÍCULOS DETALLADOS
+            // Detalles de los vehículos
             if (!p.vehicles.isEmpty()) {
                 System.out.println(ANSI_YELLOW + "   [Vehículos Pilotados]:" + ANSI_RESET);
                 for (String url : p.vehicles) {
@@ -104,7 +104,7 @@ public class FilmReport {
                     }
                 }
             }
-            System.out.println(); // Separador entre personajes
+            System.out.println();
         }
         System.out.println(border);
     }

@@ -24,7 +24,6 @@ public class Main {
             System.out.print("\nIntroduce el ID de la película: ");
 
             try {
-                // Leemos lo que escribe el usuario
                 String entrada = scanner.nextLine();
                 int filmId = Integer.parseInt(entrada);
 
@@ -37,7 +36,6 @@ public class Main {
                     System.out.println("\n>>> Iniciando descarga para la película ID " + filmId + "...");
                     System.out.println(">>> Por favor espera, descargando datos de todo el universo relacionado...");
 
-                    // Llamamos al crawler
                     crawler.crawlFilm(filmId)
                             .thenAccept(report -> {
                                 report.print();
@@ -48,7 +46,7 @@ public class Main {
                                 System.err.println("Error obteniendo datos: " + e.getMessage());
                                 return null;
                             })
-                            .join(); // Bloqueamos aquí para no volver a pintar el menú hasta que termine
+                            .join();
 
                 } else {
                     System.out.println("⚠️ ID no válido. Por favor introduce un número del 1 al 6.");
@@ -61,7 +59,6 @@ public class Main {
             }
         }
 
-        // Limpieza final
         crawler.shutdown();
         scanner.close();
         System.out.println("Crawler finalizado. ¡Que la fuerza te acompañe!");
