@@ -7,12 +7,11 @@ import java.util.stream.Collectors;
 
 public class FilmReport {
 
-    // --- CÓDIGOS ANSI PARA COLORES EN CONSOLA ---
-    // Nota: Funcionan en la mayoría de terminales modernas (IntelliJ, VSCode, Linux, Mac, Win10+)
+    // Colores para destacar secciones
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_YELLOW = "\u001B[33m";
     private static final String ANSI_BOLD = "\u001B[1m";
-    // -------------------------------------------
+    private static final String ANSI_CYAN = "\u001B[36m";
 
     private final Film film;
     private final List<Planet> planets;
@@ -34,7 +33,6 @@ public class FilmReport {
     public void print() {
         String border = "=".repeat(70);
 
-        // Título en negrita
         System.out.println("\n" + border);
         System.out.println(ANSI_BOLD + "       STAR WARS: EPISODIO " + film.episodeId + " - " + film.title.toUpperCase() + ANSI_RESET);
         System.out.println(border);
@@ -43,69 +41,88 @@ public class FilmReport {
         System.out.println("Productores:    " + film.producer);
         System.out.println("Lanzamiento:    " + film.releaseDate);
 
-        System.out.println("\n" + border);
-        // --- AQUÍ LLAMAMOS AL EFECTO ESPECIAL ---
+        // Efecto del Opening Crawl (mantenemos tu efecto chulo)
         printOpeningCrawlWithEffect(film.openingCrawl);
-        // ----------------------------------------
         System.out.println(border);
 
-        // --- RESTO DEL INFORME ---
-
-        System.out.println("\n" + ANSI_BOLD + "-- Planetas (" + planets.size() + ") --" + ANSI_RESET);
-        planets.forEach(p -> System.out.println("   * " + p.name));
-
-        System.out.println("\n" + ANSI_BOLD + "-- Especies (" + species.size() + ") --" + ANSI_RESET);
-        species.forEach(s -> System.out.println("   * " + s.name));
-
-        System.out.println("\n" + ANSI_BOLD + "-- Personajes (" + people.size() + ") y su historial de pilotaje --" + ANSI_RESET);
-        for (Person p : people) {
-            System.out.println(" > " + ANSI_BOLD + p.name + ANSI_RESET);
-
-            if (!p.starships.isEmpty()) {
-                List<String> shipNames = p.starships.stream()
-                        .map(url -> starshipMap.containsKey(url) ? starshipMap.get(url).name : "Info no disponible")
-                        .collect(Collectors.toList());
-                System.out.println("     Naves: " + shipNames);
-            }
-
-            if (!p.vehicles.isEmpty()) {
-                List<String> vehicleNames = p.vehicles.stream()
-                        .map(url -> vehicleMap.containsKey(url) ? vehicleMap.get(url).name : "Info no disponible")
-                        .collect(Collectors.toList());
-                System.out.println("     Vehículos: " + vehicleNames);
-            }
+        // --- PLANETAS ---
+        System.out.println("\n" + ANSI_BOLD + ">>> PLANETAS (" + planets.size() + ")" + ANSI_RESET);
+        for (Planet p : planets) {
+            System.out.println(ANSI_CYAN + " • " + p.name + ANSI_RESET);
+            System.out.printf("     Clima: %-15s | Terreno: %s%n", p.climate, p.terrain);
+            System.out.printf("     Diámetro: %-12s | Población: %s%n", p.diameter, p.population);
+            System.out.printf("     Rotación: %-12s | Órbita: %s días%n", p.rotationPeriod, p.orbitalPeriod);
         }
-        System.out.println("\n" + border);
+
+        // --- ESPECIES ---
+        System.out.println("\n" + ANSI_BOLD + ">>> ESPECIES (" + species.size() + ")" + ANSI_RESET);
+        for (Species s : species) {
+            System.out.println(ANSI_CYAN + " • " + s.name + ANSI_RESET);
+            System.out.printf("     Clase: %-15s | Lengua: %s%n", s.classification, s.language);
+            System.out.printf("     Altura media: %-8s | Vida media: %s años%n", s.averageHeight, s.averageLifespan);
+            System.out.printf("     Rasgos: Piel(%s), Ojos(%s)%n", s.skinColors, s.eyeColors);
+        }
+
+        // --- PERSONAJES (Y SUS MÁQUINAS) ---
+        System.out.println("\n" + ANSI_BOLD + ">>> PERSONAJES (" + people.size() + ")" + ANSI_RESET);
+        for (Person p : people) {
+            System.out.println(ANSI_BOLD + " > " + p.name.toUpperCase() + ANSI_RESET);
+            // Detalles del personaje
+            System.out.printf("   [Ficha] Nacimiento: %-8s | Género: %-8s | Altura: %s | Peso: %s%n",
+                    p.birthYear, p.gender, p.height, p.mass);
+            System.out.printf("           Pelo: %-12s | Ojos: %s%n", p.hairColor, p.eyeColor);
+
+            // NAVES DETALLADAS
+            if (!p.starships.isEmpty()) {
+                System.out.println(ANSI_YELLOW + "   [Naves Pilotadas]:" + ANSI_RESET);
+                for (String url : p.starships) {
+                    if (starshipMap.containsKey(url)) {
+                        Starship s = starshipMap.get(url);
+                        System.out.println("     - " + s.name);
+                        System.out.println("       Modelo: " + s.model);
+                        System.out.println("       Clase: " + s.starshipClass + " | Fabr: " + s.manufacturer);
+                        System.out.println("       Velocidad: " + s.maxAtmospheringSpeed + " | Hiperimpulsor: " + s.hyperdriveRating);
+                        System.out.println("       Coste: " + s.costInCredits + " créditos");
+                    } else {
+                        System.out.println("     - Datos no disponibles (Error de carga)");
+                    }
+                }
+            }
+
+            // VEHÍCULOS DETALLADOS
+            if (!p.vehicles.isEmpty()) {
+                System.out.println(ANSI_YELLOW + "   [Vehículos Pilotados]:" + ANSI_RESET);
+                for (String url : p.vehicles) {
+                    if (vehicleMap.containsKey(url)) {
+                        Vehicle v = vehicleMap.get(url);
+                        System.out.println("     - " + v.name);
+                        System.out.println("       Modelo: " + v.model);
+                        System.out.println("       Clase: " + v.vehicleClass + " | Fabr: " + v.manufacturer);
+                        System.out.println("       Coste: " + v.costInCredits + " créditos");
+                    } else {
+                        System.out.println("     - Datos no disponibles");
+                    }
+                }
+            }
+            System.out.println(); // Separador entre personajes
+        }
+        System.out.println(border);
     }
 
-    // --- MÉTODO AUXILIAR PARA EL EFECTO DE CINE ---
     private void printOpeningCrawlWithEffect(String crawlText) {
-        // 1. Dividir el texto en líneas (soporta saltos de Windows \r\n y Linux \n)
         String[] lines = crawlText.split("\\r?\\n");
-
-        System.out.println(); // Un poco de aire antes de empezar
-
-        // Activamos el color AMARILLO
+        System.out.println();
         System.out.print(ANSI_YELLOW);
-
         try {
             for (String line : lines) {
-                // Truco matemático para intentar centrar el texto (asumiendo consola de 80 chars de ancho)
                 int padding = Math.max(0, (80 - line.length()) / 2);
                 String centeredLine = " ".repeat(padding) + line;
-
-                // Imprimimos la línea centrada
                 System.out.println(centeredLine);
-
-                // PAUSA DRAMÁTICA (700 milisegundos entre líneas)
                 Thread.sleep(700);
             }
         } catch (InterruptedException e) {
-            // Si alguien interrumpe el programa mientras duerme
             Thread.currentThread().interrupt();
-            System.err.println(ANSI_RESET + "\n[!] Efecto de texto interrumpido.");
         } finally {
-            // IMPORTANTE: Volver al color normal, pase lo que pase
             System.out.print(ANSI_RESET);
         }
         System.out.println();
