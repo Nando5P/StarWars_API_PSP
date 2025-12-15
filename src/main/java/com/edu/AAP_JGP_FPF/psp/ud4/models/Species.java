@@ -7,6 +7,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Species {
     public String name;
     public String classification;
+    public String designation;
+
+    @JsonProperty("average_height")
+    public String averageHeight;
+
+    @JsonProperty("skin_colors")
+    public String skinColors;
+
+    @JsonProperty("eye_colors")
+    public String eyeColors;
+
+
+    @JsonProperty("average_lifespan")
+    public String averageLifespan;
+
+    public String language;
 
     @JsonProperty("hair_colors")
     public String hairColors;
