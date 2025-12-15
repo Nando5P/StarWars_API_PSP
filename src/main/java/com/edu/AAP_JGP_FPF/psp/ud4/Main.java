@@ -1,29 +1,69 @@
 package com.edu.AAP_JGP_FPF.psp.ud4;
 
-import com.edu.AAP_JGP_FPF.psp.ud4.models.Film;
+import java.util.Scanner;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
         SWCrawler crawler = new SWCrawler();
+        Scanner scanner = new Scanner(System.in);
+        boolean continuar = true;
 
-        System.out.println("Probando conexión con SWAPI...");
+        System.out.println("=========================================");
+        System.out.println("   STAR WARS DATA CRAWLER - SWAPI.DEV    ");
+        System.out.println("=========================================");
 
-        // Intentamos descargar el Episodio 4 (ID 1 en la base de datos)
-        crawler.get("https://swapi.dev/api/films/1/", Film.class)
-                .thenAccept(film -> {
-                    // Si llegamos aquí, ¡funcionó!
-                    System.out.println("¡ÉXITO!");
-                    System.out.println("Película: " + film.title);
-                    System.out.println("Director: " + film.episodeId);
-                    System.out.println("Tiene " + film.characters.size() + " personajes en la lista.");
-                })
-                .exceptionally(ex -> {
-                    // Si entramos aquí, algo falló
-                    System.err.println("ERROR: " + ex.getMessage());
-                    return null;
-                })
-                .join(); // El join() es necesario SOLO en el Main para que el programa no termine antes de recibir la respuesta
+        while (continuar) {
+            System.out.println("\nElige una película para analizar:");
+            System.out.println("1. A New Hope (1977)");
+            System.out.println("2. The Empire Strikes Back (1980)");
+            System.out.println("3. Return of the Jedi (1983)");
+            System.out.println("4. The Phantom Menace (1999)");
+            System.out.println("5. Attack of the Clones (2002)");
+            System.out.println("6. Revenge of the Sith (2005)");
+            System.out.println("0. Salir");
+            System.out.print("\nIntroduce el ID de la película: ");
+
+            try {
+                // Leemos lo que escribe el usuario
+                String entrada = scanner.nextLine();
+                int filmId = Integer.parseInt(entrada);
+
+                if (filmId == 0) {
+                    continuar = false;
+                    System.out.println("Cerrando el sistema...");
+                } else if (filmId >= 1 && filmId <= 6) {
+
+                    long start = System.currentTimeMillis();
+                    System.out.println("\n>>> Iniciando descarga para la película ID " + filmId + "...");
+                    System.out.println(">>> Por favor espera, descargando datos de todo el universo relacionado...");
+
+                    // Llamamos al crawler
+                    crawler.crawlFilm(filmId)
+                            .thenAccept(report -> {
+                                report.print();
+                                long time = System.currentTimeMillis() - start;
+                                System.out.println("\n[!] Informe generado en " + time + "ms");
+                            })
+                            .exceptionally(e -> {
+                                System.err.println("Error obteniendo datos: " + e.getMessage());
+                                return null;
+                            })
+                            .join(); // Bloqueamos aquí para no volver a pintar el menú hasta que termine
+
+                } else {
+                    System.out.println("⚠️ ID no válido. Por favor introduce un número del 1 al 6.");
+                }
+
+            } catch (NumberFormatException e) {
+                System.out.println("⚠️ Por favor, introduce solo números.");
+            } catch (Exception e) {
+                System.err.println("Error inesperado: " + e.getMessage());
+            }
+        }
+
+        // Limpieza final
+        crawler.shutdown();
+        scanner.close();
+        System.out.println("Crawler finalizado. ¡Que la fuerza te acompañe!");
     }
 }
