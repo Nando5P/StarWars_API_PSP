@@ -1,4 +1,4 @@
-package com.edu.AAP_JGP_FPF.psp.ud4.model;
+package com.edu.AAP_JGP_FPF.psp.ud4.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
