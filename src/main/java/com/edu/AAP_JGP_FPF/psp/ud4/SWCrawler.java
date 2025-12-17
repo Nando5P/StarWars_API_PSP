@@ -38,7 +38,7 @@ public class SWCrawler {
      * Método principal que descarga la película y la información detallada de la misma
      */
     public CompletableFuture<FilmReport> crawlFilm(int filmId) {
-        String url = "https://swapi.dev/api/films/" + filmId + "/";
+        String url = "https://swapi.info/api/films/" + filmId + "/";
 
         return get(url, Film.class).thenCompose(film -> {
             System.out.println("Película: " + film.title + ". Descargando personajes para analizar sus naves...");
