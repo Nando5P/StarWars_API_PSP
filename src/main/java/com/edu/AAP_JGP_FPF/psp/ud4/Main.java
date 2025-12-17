@@ -1,11 +1,20 @@
 package com.edu.AAP_JGP_FPF.psp.ud4;
 
+import com.fasterxml.jackson.databind.ObjectMapper;         // NUEVO
+import com.fasterxml.jackson.databind.SerializationFeature; // NUEVO
+import java.io.File;                                        // NUEVO
+import java.io.IOException;                                 // NUEVO
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         SWCrawler crawler = new SWCrawler();
         Scanner scanner = new Scanner(System.in);
+
+        // NUEVO: Configuramos el Mapper para generar JSONs bonitos (indentados)
+        ObjectMapper jsonMapper = new ObjectMapper();
+        jsonMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
         boolean continuar = true;
 
         System.out.println("=========================================");
@@ -13,7 +22,7 @@ public class Main {
         System.out.println("=========================================");
 
         while (continuar) {
-            System.out.println("\nElige una película para analizar:");
+            System.out.println("\nElige una película para analizar y exportar:");
             System.out.println("1. A New Hope (1977)");
             System.out.println("2. The Empire Strikes Back (1980)");
             System.out.println("3. Return of the Jedi (1983)");
@@ -34,13 +43,30 @@ public class Main {
 
                     long start = System.currentTimeMillis();
                     System.out.println("\n>>> Iniciando descarga para la película ID " + filmId + "...");
-                    System.out.println(">>> Por favor espera, descargando datos de todo el universo relacionado...");
+                    System.out.println(">>> Por favor espera, descargando datos y generando JSON...");
 
                     crawler.crawlFilm(filmId)
                             .thenAccept(report -> {
+                                // 1. Imprimir por pantalla (Lo que ya hacías)
                                 report.print();
+
+                                // 2. NUEVO: Guardar en archivo JSON
+                                try {
+                                    String fileName = "starwars_episode_" + filmId + ".json";
+                                    File file = new File(fileName);
+
+                                    // Escribimos el objeto report en el archivo
+                                    jsonMapper.writeValue(file, report);
+
+                                    System.out.println("\n[✔] JSON generado correctamente: " + file.getAbsolutePath());
+                                    System.out.println("    (Listo para subir a MockAPI)");
+
+                                } catch (IOException e) {
+                                    System.err.println("\n[X] Error guardando el JSON: " + e.getMessage());
+                                }
+
                                 long time = System.currentTimeMillis() - start;
-                                System.out.println("\n[!] Informe generado en " + time + "ms");
+                                System.out.println("[!] Proceso total finalizado en " + time + "ms");
                             })
                             .exceptionally(e -> {
                                 System.err.println("Error obteniendo datos: " + e.getMessage());
