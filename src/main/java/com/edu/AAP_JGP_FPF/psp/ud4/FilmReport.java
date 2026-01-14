@@ -1,6 +1,6 @@
 package com.edu.AAP_JGP_FPF.psp.ud4;
 
-import com.fasterxml.jackson.annotation.JsonIgnore; // Importante para que el JSON Ignore los Map
+import com.fasterxml.jackson.annotation.JsonIgnore; // Importante para que el JSON ignore los Map
 import com.edu.AAP_JGP_FPF.psp.ud4.models.*;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +28,15 @@ public class FilmReport {
     @JsonIgnore
     private final Map<String, Vehicle> vehicleMap;
 
+    /**
+     * CONSTRUCTOR
+     * @param film
+     * @param planets
+     * @param species
+     * @param people
+     * @param starships
+     * @param vehicles
+     */
     public FilmReport(Film film, List<Planet> planets, List<Species> species,
                       List<Person> people, List<Starship> starships, List<Vehicle> vehicles) {
         this.film = film;
@@ -119,6 +128,10 @@ public class FilmReport {
         System.out.println(border);
     }
 
+    /**
+     * Método para mostrar el Crawling con el efecto de mostrar poco a poco el texto
+     * @param crawlText
+     */
     private void printOpeningCrawlWithEffect(String crawlText) {
         String[] lines = crawlText.split("\\r?\\n");
         System.out.println();

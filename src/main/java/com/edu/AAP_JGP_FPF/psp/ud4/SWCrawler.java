@@ -21,7 +21,8 @@ public class SWCrawler {
     private final Map<String, CompletableFuture<?>> cache = new ConcurrentHashMap<>();
 
     /**
-     * Constructor. Creará 10 hilos usando Executor pera solicitar la petición de información a la API
+     * CONSTRUCTOR 
+     * Creará 10 hilos usando Executor para solicitar la petición de información a la API
      */
     public SWCrawler() {
         this.executor = Executors.newFixedThreadPool(10);
@@ -36,6 +37,7 @@ public class SWCrawler {
 
     /**
      * Método principal que descarga la película y la información detallada de la misma
+     * @param filmId
      */
     public CompletableFuture<FilmReport> crawlFilm(int filmId) {
         String url = "https://swapi.info/api/films/" + filmId + "/";
@@ -71,7 +73,16 @@ public class SWCrawler {
         });
     }
 
-    private <T> CompletableFuture<List<T>> getAll(List<String> urls, Class<T> clazz) {
+    /**
+     * Método auxiliar para descargar múltiples recursos en paralelo.
+     * Convierte una lista de URLs en una lista de objetos completados.
+     *
+     * @param urls Lista de URLs a descargar.
+     * @param clazz Clase del objeto esperado.
+     * @return Un CompletableFuture que contiene la lista de objetos descargados.
+     * @param <T> Tipo del objeto.
+     */
+      private <T> CompletableFuture<List<T>> getAll(List<String> urls, Class<T> clazz) {
         List<CompletableFuture<T>> futures = urls.stream()
                 .map(url -> get(url, clazz))
                 .collect(Collectors.toList());
@@ -83,6 +94,15 @@ public class SWCrawler {
                         .collect(Collectors.toList()));
     }
 
+    /**
+     * Realiza una petición GET asíncrona a una URL específica.
+     * Implementa caché para evitar descargas duplicadas y deserializa la respuesta JSON.
+     *
+     * @param url URL del recurso a descargar.
+     * @param clazz Clase a la que se debe mapear el JSON de respuesta.
+     * @return Un CompletableFuture con el objeto deserializado.
+     * @param <T> Tipo del objeto a retornar.
+     */
     @SuppressWarnings("unchecked")
     public <T> CompletableFuture<T> get(String url, Class<T> clazz) {
         String secureUrl = url.replace("http://", "https://");
@@ -103,6 +123,9 @@ public class SWCrawler {
         });
     }
 
+    /**
+     * Cierra el ExecutorService liberando los recursos del pool de hilos.
+     */
     public void shutdown() {
         executor.shutdown();
     }
