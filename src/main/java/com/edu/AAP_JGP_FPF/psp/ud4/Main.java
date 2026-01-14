@@ -1,9 +1,9 @@
 package com.edu.AAP_JGP_FPF.psp.ud4;
 
-import com.fasterxml.jackson.databind.ObjectMapper;         // NUEVO
-import com.fasterxml.jackson.databind.SerializationFeature; // NUEVO
-import java.io.File;                                        // NUEVO
-import java.io.IOException;                                 // NUEVO
+import com.fasterxml.jackson.databind.ObjectMapper;         
+import com.fasterxml.jackson.databind.SerializationFeature; 
+import java.io.File;                                        
+import java.io.IOException;                                 
 import java.util.Scanner;
 
 public class Main {
@@ -11,7 +11,6 @@ public class Main {
         SWCrawler crawler = new SWCrawler();
         Scanner scanner = new Scanner(System.in);
 
-        // NUEVO: Configuramos el Mapper para generar JSONs bonitos (indentados)
         ObjectMapper jsonMapper = new ObjectMapper();
         jsonMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -46,16 +45,13 @@ public class Main {
                     System.out.println(">>> Por favor espera, descargando datos y generando JSON...");
 
                     crawler.crawlFilm(filmId)
-                            .thenAccept(report -> {
-                                // 1. Imprimir por pantalla (Lo que ya hacías)
+                            .thenAccept(report -> {                               
                                 report.print();
 
-                                // 2. NUEVO: Guardar en archivo JSON
                                 try {
                                     String fileName = "starwars_episode_" + filmId + ".json";
                                     File file = new File(fileName);
 
-                                    // Escribimos el objeto report en el archivo
                                     jsonMapper.writeValue(file, report);
 
                                     System.out.println("\n[✔] JSON generado correctamente: " + file.getAbsolutePath());
