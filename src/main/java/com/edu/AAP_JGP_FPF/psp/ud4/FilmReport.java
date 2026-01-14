@@ -1,5 +1,6 @@
 package com.edu.AAP_JGP_FPF.psp.ud4;
 
+import com.fasterxml.jackson.annotation.JsonIgnore; // Importante para el JSON
 import com.edu.AAP_JGP_FPF.psp.ud4.models.*;
 import java.util.List;
 import java.util.Map;
@@ -7,17 +8,24 @@ import java.util.stream.Collectors;
 
 public class FilmReport {
 
-    // --- CÓDIGOS ANSI PARA COLORES EN CONSOLA ---
+    // --- CONFIGURACIÓN VISUAL (Colores) ---
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_YELLOW = "\u001B[33m";
     private static final String ANSI_BOLD = "\u001B[1m";
     private static final String ANSI_CYAN = "\u001B[36m";
 
+    // --- DATOS (Se guardarán en el JSON) ---
     private final Film film;
     private final List<Planet> planets;
     private final List<Species> species;
     private final List<Person> people;
+    private final List<Starship> starships; // Necesario para el JSON
+    private final List<Vehicle> vehicles;   // Necesario para el JSON
+
+    // --- DATOS AUXILIARES (NO se guardarán en el JSON) ---
+    @JsonIgnore
     private final Map<String, Starship> starshipMap;
+    @JsonIgnore
     private final Map<String, Vehicle> vehicleMap;
 
     public FilmReport(Film film, List<Planet> planets, List<Species> species,
@@ -26,10 +34,24 @@ public class FilmReport {
         this.planets = planets;
         this.species = species;
         this.people = people;
+        this.starships = starships;
+        this.vehicles = vehicles;
+
+        // Construimos los mapas para búsqueda rápida (O(1)) al imprimir
         this.starshipMap = starships.stream().collect(Collectors.toMap(s -> s.url, s -> s));
         this.vehicleMap = vehicles.stream().collect(Collectors.toMap(v -> v.url, v -> v));
     }
 
+    // --- GETTERS (Necesarios para que Jackson genere el JSON) ---
+    public Film getFilm() { return film; }
+    public List<Planet> getPlanets() { return planets; }
+    public List<Species> getSpecies() { return species; }
+    public List<Person> getPeople() { return people; }
+    public List<Starship> getStarships() { return starships; }
+    public List<Vehicle> getVehicles() { return vehicles; }
+    // -----------------------------------------------------------
+
+    // --- MÉTODO VISUAL (Mantenemos tu diseño detallado) ---
     public void print() {
         String border = "=".repeat(70);
 
@@ -41,64 +63,54 @@ public class FilmReport {
         System.out.println("Productores:    " + film.producer);
         System.out.println("Lanzamiento:    " + film.releaseDate);
 
-        System.out.println("\n" + border);
+        // Efecto visual del texto flotante
         printOpeningCrawlWithEffect(film.openingCrawl);
         System.out.println(border);
 
-        // Detalles de los planetas
+        // --- PLANETAS ---
         System.out.println("\n" + ANSI_BOLD + ">>> PLANETAS (" + planets.size() + ")" + ANSI_RESET);
         for (Planet p : planets) {
             System.out.println(ANSI_CYAN + " • " + p.name + ANSI_RESET);
             System.out.printf("     Clima: %-15s | Terreno: %s%n", p.climate, p.terrain);
             System.out.printf("     Diámetro: %-12s | Población: %s%n", p.diameter, p.population);
-            System.out.printf("     Rotación: %-12s | Órbita: %s días%n", p.rotationPeriod, p.orbitalPeriod);
         }
 
-        // Detalles de las especies
+        // --- ESPECIES ---
         System.out.println("\n" + ANSI_BOLD + ">>> ESPECIES (" + species.size() + ")" + ANSI_RESET);
         for (Species s : species) {
             System.out.println(ANSI_CYAN + " • " + s.name + ANSI_RESET);
             System.out.printf("     Clase: %-15s | Lengua: %s%n", s.classification, s.language);
-            System.out.printf("     Altura media: %-8s | Vida media: %s años%n", s.averageHeight, s.averageLifespan);
             System.out.printf("     Rasgos: Piel(%s), Ojos(%s)%n", s.skinColors, s.eyeColors);
         }
 
-        // Detalles de los personajes y sus naves y vehículos
+        // --- PERSONAJES ---
         System.out.println("\n" + ANSI_BOLD + ">>> PERSONAJES (" + people.size() + ")" + ANSI_RESET);
         for (Person p : people) {
             System.out.println(ANSI_BOLD + " > " + p.name.toUpperCase() + ANSI_RESET);
-            // Detalles del personaje
-            System.out.printf("   [Ficha] Nacimiento: %-8s | Género: %-8s | Altura: %s | Peso: %s%n",
-                    p.birthYear, p.gender, p.height, p.mass);
-            System.out.printf("           Pelo: %-12s | Ojos: %s%n", p.hairColor, p.eyeColor);
+            System.out.printf("   [Ficha] Nacimiento: %-8s | Género: %-8s | Altura: %s%n",
+                    p.birthYear, p.gender, p.height);
 
-            // Detalles de las naves
+            // NAVES (Buscadas en el mapa)
             if (!p.starships.isEmpty()) {
                 System.out.println(ANSI_YELLOW + "   [Naves Pilotadas]:" + ANSI_RESET);
                 for (String url : p.starships) {
                     if (starshipMap.containsKey(url)) {
                         Starship s = starshipMap.get(url);
-                        System.out.println("     - " + s.name);
-                        System.out.println("       Modelo: " + s.model);
-                        System.out.println("       Clase: " + s.starshipClass + " | Fabr: " + s.manufacturer);
-                        System.out.println("       Velocidad: " + s.maxAtmospheringSpeed + " | Hiperimpulsor: " + s.hyperdriveRating);
-                        System.out.println("       Coste: " + s.costInCredits + " créditos");
+                        System.out.println("     - " + s.name + " (" + s.model + ")");
+                        System.out.println("       Coste: " + s.costInCredits + " | Clase: " + s.starshipClass);
                     } else {
-                        System.out.println("     - Datos no disponibles (Error de carga)");
+                        System.out.println("     - Datos no disponibles");
                     }
                 }
             }
 
-            // Detalles de los vehículos
+            // VEHÍCULOS (Buscados en el mapa)
             if (!p.vehicles.isEmpty()) {
                 System.out.println(ANSI_YELLOW + "   [Vehículos Pilotados]:" + ANSI_RESET);
                 for (String url : p.vehicles) {
                     if (vehicleMap.containsKey(url)) {
                         Vehicle v = vehicleMap.get(url);
-                        System.out.println("     - " + v.name);
-                        System.out.println("       Modelo: " + v.model);
-                        System.out.println("       Clase: " + v.vehicleClass + " | Fabr: " + v.manufacturer);
-                        System.out.println("       Coste: " + v.costInCredits + " créditos");
+                        System.out.println("     - " + v.name + " (" + v.model + ")");
                     } else {
                         System.out.println("     - Datos no disponibles");
                     }
