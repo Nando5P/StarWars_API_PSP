@@ -1,6 +1,6 @@
 package com.edu.AAP_JGP_FPF.psp.ud4;
 
-import com.fasterxml.jackson.annotation.JsonIgnore; // Importante para el JSON
+import com.fasterxml.jackson.annotation.JsonIgnore; // Importante para que el JSON Ignore los Map
 import com.edu.AAP_JGP_FPF.psp.ud4.models.*;
 import java.util.List;
 import java.util.Map;
