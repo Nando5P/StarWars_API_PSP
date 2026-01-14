@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class FilmReport {
 
-    // --- CONFIGURACIÓN VISUAL (Colores) ---
+    // --- CONFIGURACIÓN VISUAL ---
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_YELLOW = "\u001B[33m";
     private static final String ANSI_BOLD = "\u001B[1m";
@@ -19,8 +19,8 @@ public class FilmReport {
     private final List<Planet> planets;
     private final List<Species> species;
     private final List<Person> people;
-    private final List<Starship> starships; // Necesario para el JSON
-    private final List<Vehicle> vehicles;   // Necesario para el JSON
+    private final List<Starship> starships; // Necesario para que el JSON muestre las naves
+    private final List<Vehicle> vehicles;   // Necesario para que el JSON muestre los vehículos
 
     // --- DATOS AUXILIARES (NO se guardarán en el JSON) ---
     @JsonIgnore
@@ -37,12 +37,11 @@ public class FilmReport {
         this.starships = starships;
         this.vehicles = vehicles;
 
-        // Construimos los mapas para búsqueda rápida (O(1)) al imprimir
         this.starshipMap = starships.stream().collect(Collectors.toMap(s -> s.url, s -> s));
         this.vehicleMap = vehicles.stream().collect(Collectors.toMap(v -> v.url, v -> v));
     }
 
-    // --- GETTERS (Necesarios para que Jackson genere el JSON) ---
+    // --- GETTERS ---
     public Film getFilm() { return film; }
     public List<Planet> getPlanets() { return planets; }
     public List<Species> getSpecies() { return species; }
@@ -51,7 +50,7 @@ public class FilmReport {
     public List<Vehicle> getVehicles() { return vehicles; }
     // -----------------------------------------------------------
 
-    // --- MÉTODO VISUAL (Mantenemos tu diseño detallado) ---
+    // --- MÉTODO VISUAL ---
     public void print() {
         String border = "=".repeat(70);
 
@@ -63,7 +62,6 @@ public class FilmReport {
         System.out.println("Productores:    " + film.producer);
         System.out.println("Lanzamiento:    " + film.releaseDate);
 
-        // Efecto visual del texto flotante
         printOpeningCrawlWithEffect(film.openingCrawl);
         System.out.println(border);
 
@@ -90,7 +88,7 @@ public class FilmReport {
             System.out.printf("   [Ficha] Nacimiento: %-8s | Género: %-8s | Altura: %s%n",
                     p.birthYear, p.gender, p.height);
 
-            // NAVES (Buscadas en el mapa)
+            // --- NAVES ---
             if (!p.starships.isEmpty()) {
                 System.out.println(ANSI_YELLOW + "   [Naves Pilotadas]:" + ANSI_RESET);
                 for (String url : p.starships) {
@@ -104,7 +102,7 @@ public class FilmReport {
                 }
             }
 
-            // VEHÍCULOS (Buscados en el mapa)
+            // --- VEHÍCULOS ---
             if (!p.vehicles.isEmpty()) {
                 System.out.println(ANSI_YELLOW + "   [Vehículos Pilotados]:" + ANSI_RESET);
                 for (String url : p.vehicles) {
